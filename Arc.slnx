@@ -1,0 +1,11 @@
+<Solution>
+  <Folder Name="/Samples/">
+    <Project Path="Samples/Bridgehead/Bridgehead.csproj" />
+  </Folder>
+  <Folder Name="/Source/">
+    <Project Path="Source/Arc.Core/Arc.Core.csproj" />
+    <Project Path="Source/Arc.Platform/Arc.Platform.csproj" />
+    <Project Path="Source/Arc.Runtime/Arc.Runtime.csproj" />
+  </Folder>
+  <Project Path="Arc.Framework/Arc.Framework.csproj" />
+</Solution>
