@@ -1,18 +1,18 @@
 <Project>
     <PropertyGroup>
+        <!-- One version for all Arc.* packages -->
         <Version>0.1.0</Version>
 
+        <!-- Packaging defaults -->
+        <IsPackable>true</IsPackable>
+        <Nullable>enable</Nullable>
+        <ImplicitUsings>enable</ImplicitUsings>
+        <TreatWarningsAsErrors>true</TreatWarningsAsErrors>
+        
         <Authors>Stuart Millman</Authors>
         <RepositoryType>git</RepositoryType>
         <RepositoryUrl>https://github.com/stuart6854/Arc.Framework</RepositoryUrl>
         <PublishRepositoryUrl>true</PublishRepositoryUrl>
         <PackageLicenseExpression>MIT</PackageLicenseExpression>
-        
-        <TreatWarningsAsErrors>true</TreatWarningsAsErrors>
-        <ImplicitUsings>enable</ImplicitUsings>
-        <Nullable>enable</Nullable>
-        
-        <!-- Packaging defaults -->
-        <IsPackable>true</IsPackable>
     </PropertyGroup>
 </Project>
