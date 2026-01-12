@@ -1,0 +1,29 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+    <PropertyGroup>
+        <TargetFramework>net10.0</TargetFramework>
+        <LangVersion>Latest</LangVersion>
+        <ImplicitUsings>enable</ImplicitUsings>
+        <Nullable>enable</Nullable>
+    </PropertyGroup>
+
+    <ItemGroup>
+        <ProjectReference Include="..\Arc.Core\Arc.Core.csproj"/>
+        <!-- In-repo development: use project reference as analyzer -->
+        <ProjectReference Include="..\Arc.Ecs.SourceGen\Arc.Ecs.SourceGen.csproj"
+                          OutputItemType="Analyzer"
+                          ReferenceOutputAssembly="false"/>
+    </ItemGroup>
+
+    <ItemGroup Condition="'$(IsPacking)'=='true'">
+        <PackageReference Include="Arc.Ecs.SourceGen"
+                          Version="$(Version)"
+                          IncludeAssets="analyzers;buildtransitive"/>
+    </ItemGroup>
+
+    <PropertyGroup>
+        <!-- Set automatically during dotnet pack -->
+        <IsPacking Condition="'$(PackageOutputPath)' != ''">true</IsPacking>
+    </PropertyGroup>
+
+</Project>

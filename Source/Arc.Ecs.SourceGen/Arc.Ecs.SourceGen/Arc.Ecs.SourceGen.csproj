@@ -1,0 +1,32 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+    <PropertyGroup>
+        <!-- netstandard2.0 is the safest target for analyzers/generators -->
+        <TargetFramework>netstandard2.0</TargetFramework>
+        <LangVersion>Latest</LangVersion>
+
+        <PackageId>Arc.Ecs.SourceGen</PackageId>
+        <Description>Source generator for Arc.Ecs</Description>
+
+        <!-- Tells SDK to pack it as an analyzer -->
+        <IsRoslynAnalyzer>true</IsRoslynAnalyzer>
+        <IncludeBuildOutput>false</IncludeBuildOutput>
+        <EnforceExtendedAnalyzerRules>true</EnforceExtendedAnalyzerRules>
+
+        <RootNamespace>Arc.Ecs.SourceGen</RootNamespace>
+    </PropertyGroup>
+
+    <!-- The following libraries include the source generator interfaces and types we need -->
+    <ItemGroup>
+        <PackageReference Include="Microsoft.CodeAnalysis.CSharp" Version="4.14.0" PrivateAssets="all"/>
+        <PackageReference Include="Microsoft.CodeAnalysis.Analyzers" Version="3.11.0" PrivateAssets="all" />
+    </ItemGroup>
+
+    <!-- This ensures the library will be packaged as a source generator when we use `dotnet pack` -->
+    <!--<ItemGroup>
+        <None Include="$(OutputPath)\$(AssemblyName).dll" Pack="true"
+              PackagePath="analyzers/dotnet/cs" Visible="false"/>
+    </ItemGroup>-->
+
+
+</Project>

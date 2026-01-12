@@ -4,6 +4,8 @@
   </Folder>
   <Folder Name="/Source/">
     <Project Path="Source/Arc.Core/Arc.Core.csproj" />
+    <Project Path="Source/Arc.Ecs.SourceGen/Arc.Ecs.SourceGen/Arc.Ecs.SourceGen.csproj" />
+    <Project Path="Source/Arc.Ecs/Arc.Ecs.csproj" />
     <Project Path="Source/Arc.Platform/Arc.Platform.csproj" />
     <Project Path="Source/Arc.Runtime/Arc.Runtime.csproj" />
   </Folder>
