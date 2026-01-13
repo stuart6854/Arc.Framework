@@ -1,6 +1,7 @@
 <Solution>
   <Folder Name="/Samples/">
     <Project Path="Samples/Bridgehead/Bridgehead.csproj" />
+    <Project Path="Samples/SpaceShooter2D/SpaceShooter2D.csproj" />
   </Folder>
   <Folder Name="/Source/">
     <Project Path="Source/Arc.Core/Arc.Core.csproj" />
