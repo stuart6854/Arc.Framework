@@ -1,6 +1,6 @@
 ﻿namespace Arc.Ecs;
 
-internal sealed class Chunk
+public sealed class Chunk
 {
     internal static uint ChunkByteBudget => 16u * 1024u; // 64kb
 

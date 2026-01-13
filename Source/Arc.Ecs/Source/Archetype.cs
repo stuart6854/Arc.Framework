@@ -5,9 +5,10 @@ namespace Arc.Ecs;
 using ComponentId = ulong;
 using ArchetypeKeyHash = ulong;
 
-internal readonly struct ArchetypeKey
+public readonly struct ArchetypeKey
 {
     public List<ComponentId> ComponentTypeIds { get; } = [];
+    public ComponentMask Mask { get; } = new();
     public ArchetypeKeyHash Hash { get; }
 
     public ArchetypeKey() { }
@@ -15,6 +16,7 @@ internal readonly struct ArchetypeKey
     {
         ComponentTypeIds.AddRange(componentTypeIds);
         ComponentTypeIds.Sort();
+        Mask = ComponentMask.FromMax(ComponentTypeIds.Count > 0 ? ComponentRegistry.Get(ComponentTypeIds.Last())!.Value.BitIndex + 1 : 0);
         Hash = FNV1A.ComputeHash(ComponentTypeIds);
     }
     // public ArchetypeKey(params Type[] componentTypes) : this(componentTypes.Select(t => FNV1A.ComputeHash(t.FullName!)).ToArray()) { }
@@ -24,6 +26,7 @@ internal readonly struct ArchetypeKey
         ComponentTypeIds.AddRange(otherKey.ComponentTypeIds);
         ComponentTypeIds.Add(idToAdd);
         ComponentTypeIds.Sort();
+        Mask = ComponentMask.FromMax(ComponentTypeIds.Count > 0 ? ComponentRegistry.Get(ComponentTypeIds.Last())!.Value.BitIndex + 1 : 0);
         Hash = FNV1A.ComputeHash(ComponentTypeIds);
     }
 
@@ -40,12 +43,13 @@ internal readonly struct ArchetypeKey
 /// <summary>
 /// An archetype is a specific set of components.
 /// </summary>
-internal class Archetype(uint uniqueId, ArchetypeKey key)
+public class Archetype(uint uniqueId, ArchetypeKey key)
 {
     public static uint ChunkCapacity => 1024;
 
     public uint UniqueId { get; } = uniqueId;
     public ArchetypeKey Key { get; } = key;
+    public ComponentMask Mask => Key.Mask;
     public uint ComponentCount => (uint)Key.ComponentTypeIds.Count;
 
     public int EntityCount { get; set; }

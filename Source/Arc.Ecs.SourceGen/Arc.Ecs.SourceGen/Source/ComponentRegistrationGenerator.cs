@@ -141,7 +141,8 @@ public class {ComponentAttributeName} : System.Attribute
             writer.WriteLine($"ManagedType: typeof({targetComponent.FullName}),");
             writer.WriteLine($"Size: (uint)Unsafe.SizeOf<{targetComponent.FullName}>(),");
             writer.WriteLine($"ContainsRefs: {targetComponent.IsReferenceType.ToString().ToLowerInvariant()},");
-            writer.WriteLine($"IsTag: Unsafe.SizeOf<{targetComponent.FullName}>() <= 1");
+            writer.WriteLine($"IsTag: Unsafe.SizeOf<{targetComponent.FullName}>() <= 1,");
+            writer.WriteLine($"BitIndex: 0"); // Will be set automatically
             writer.Indent--;
             writer.WriteLine(");");
         }

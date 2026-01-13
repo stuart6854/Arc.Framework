@@ -25,4 +25,6 @@ public static class Utility
 
         return hash;
     }
+    
+    public static string Join(int count, Func<int, string> func, string separator) => string.Join(separator, Enumerable.Range(0, count).Select(func));
 }

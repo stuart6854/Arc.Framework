@@ -2,7 +2,16 @@
 
 namespace Arc.Ecs;
 
-public record struct ComponentTypeInfo(ulong Id, Type ManagedType, uint Size, bool ContainsRefs, bool IsTag);
+/// <summary>
+/// 
+/// </summary>
+/// <param name="Id"></param>
+/// <param name="ManagedType"></param>
+/// <param name="Size"></param>
+/// <param name="ContainsRefs"></param>
+/// <param name="IsTag"></param>
+/// <param name="BitIndex">Bit position for filters/archetypes. Set automatically.</param>
+public record struct ComponentTypeInfo(ulong Id, Type ManagedType, uint Size, bool ContainsRefs, bool IsTag, int BitIndex);
 
 public static partial class ComponentRegistry
 {
@@ -12,7 +21,11 @@ public static partial class ComponentRegistry
 
     public static IReadOnlyList<ComponentTypeInfo> Components => _components;
 
-    public static void Register(ComponentTypeInfo typeInfo) { _components.Add(typeInfo); }
+    public static void Register(ComponentTypeInfo typeInfo)
+    {
+        typeInfo.BitIndex = _components.Count;
+        _components.Add(typeInfo);
+    }
 
     public static ComponentTypeInfo? Get(ulong id) => _components.Find(c => c.Id == id);
 }

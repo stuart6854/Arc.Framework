@@ -12,6 +12,8 @@ public class World
     private Dictionary<ArchetypeKey, Archetype> _archetypes = [];
     private uint _nextArchetypeId = 1;
 
+    internal ICollection<Archetype> Archetypes => _archetypes.Values;
+
     #region Entities
 
     public Entity CreateEntity()
@@ -143,6 +145,13 @@ public class World
             Add<T>(entity);
         return ref GetMutable<T>(entity);
     }
+
+    #endregion
+
+    #region Queries
+
+    public Query Query() => new(this);
+    public Query<T0> Query<T0>() => new(this);
 
     #endregion
 
