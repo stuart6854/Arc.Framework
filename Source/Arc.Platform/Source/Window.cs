@@ -18,11 +18,13 @@ public class Window
 
     public IntPtr Handle { get; }
     public IntPtr NativeHandle => SDL_GetPointerProperty(SDL_GetWindowProperties(Handle), SDL_PROP_WINDOW_WIN32_HWND_POINTER, IntPtr.Zero);
+
     public string Title
     {
         get => SDL_GetWindowTitle(Handle);
         set => SDL_SetWindowTitle(Handle, value);
     }
+
     public Int2 Size
     {
         get
@@ -32,6 +34,8 @@ public class Window
         }
         set => SDL_SetWindowSize(Handle, value.X, value.Y);
     }
+    public float AspectRatio => (float)Size.X / Size.Y;
+
     public bool CloseRequested { get; private set; }
 
     internal void HandleEvent(SDL_WindowEvent evt)
