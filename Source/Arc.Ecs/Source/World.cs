@@ -35,11 +35,11 @@ public class World
         archetype.AddNewEntity(e, out var chunkIndex, out var compIndex);
         entityRecord.Archetype = archetype;
         entityRecord.ChunkIndex = chunkIndex;
-        entityRecord.ComponentRow = compIndex;
+        entityRecord.Row = compIndex;
 
         Assert.NotNull(entityRecord.Archetype);
         Assert.IsTrue(entityRecord.ChunkIndex >= 0);
-        Assert.IsTrue(entityRecord.ComponentRow >= 0);
+        Assert.IsTrue(entityRecord.Row >= 0);
 
         return e;
     }
@@ -92,12 +92,12 @@ public class World
         var key = new ArchetypeKey(srcArchetype.Key, typeId);
 
         var dstArchetype = GetOrCreateArchetype(key);
-        dstArchetype.AddNewEntity(entity, out var dstChunkIndex, out var dstCompIndex);
-        MoveComponentsToChunk(srcArchetype.Chunks[entityRecord.ChunkIndex], entityRecord.ComponentRow, dstArchetype.Chunks[dstChunkIndex], dstCompIndex);
+        dstArchetype.AddNewEntity(entity, out var dstChunkIndex, out var dstRow);
+        MoveComponentsToChunk(srcArchetype.Chunks[entityRecord.ChunkIndex], entityRecord.Row, dstArchetype.Chunks[dstChunkIndex], dstRow);
 
         entityRecord.Archetype = dstArchetype;
         entityRecord.ChunkIndex = dstChunkIndex;
-        entityRecord.ComponentRow = dstCompIndex;
+        entityRecord.Row = dstRow;
     }
 
     public void Remove<T>(Entity entity)
@@ -116,11 +116,11 @@ public class World
 
         var dstArchetype = GetOrCreateArchetype(key);
         dstArchetype.AddNewEntity(entity, out var dstChunkIndex, out var dstCompIndex);
-        MoveComponentsToChunk(srcArchetype.Chunks[entityRecord.ChunkIndex], entityRecord.ComponentRow, dstArchetype.Chunks[dstChunkIndex], dstCompIndex);
+        MoveComponentsToChunk(srcArchetype.Chunks[entityRecord.ChunkIndex], entityRecord.Row, dstArchetype.Chunks[dstChunkIndex], dstCompIndex);
 
         entityRecord.Archetype = dstArchetype;
         entityRecord.ChunkIndex = dstChunkIndex;
-        entityRecord.ComponentRow = dstCompIndex;
+        entityRecord.Row = dstCompIndex;
     }
 
     public ref readonly T Get<T>(Entity entity) { return ref GetMutable<T>(entity); }
@@ -136,7 +136,7 @@ public class World
         var chunk = entityRecord.Archetype.Chunks[entityRecord.ChunkIndex];
         var columnIndex = chunk.GetColumnIndex<T>();
         var column = (T[])chunk.Columns[columnIndex];
-        return ref column[entityRecord.ComponentRow];
+        return ref column[entityRecord.Row];
     }
 
     public ref T Ensure<T>(Entity entity)
@@ -169,78 +169,86 @@ public class World
         return archetype;
     }
 
-    private void MoveComponentsToChunk(Chunk? srcChunk, int srcCompIndex, Chunk dstChunk, int dstCompIndex)
+    /// <summary>
+    /// Move an entities components from srcChunk[srcRow] to dstChunk[dstRow].
+    /// Constructing, copying or destroying where required.
+    /// </summary>
+    /// <param name="srcChunk">The source Chunk</param>
+    /// <param name="srcRow">The index of the source row in srcChunk</param>
+    /// <param name="dstChunk">The destination Chunk</param>
+    /// <param name="dstRow">The index of the destination row in dstChunk</param>
+    private void MoveComponentsToChunk(Chunk? srcChunk, int srcRow, Chunk dstChunk, int dstRow)
     {
-        bool isMovingLastRow = srcChunk != null && srcCompIndex == srcChunk.Count - 1;
+        bool isMovingLastRow = srcChunk != null && srcRow == srcChunk.Count - 1;
 
-        var srcCompCount = srcChunk?.Archetype.ComponentCount ?? 0;
-        var dstCompCount = dstChunk.Archetype.ComponentCount;
+        var srcColumnCount = srcChunk?.Archetype.ComponentCount ?? 0;
+        var dstColumnCount = dstChunk.Archetype.ComponentCount;
 
-        uint srcRow = 0;
-        uint dstRow = 0;
+        int srcColumnIndex = 0;
+        int dstColumnIndex = 0;
 
         // 1) Merge common, removed, added components
-        while (srcRow < srcCompCount || dstRow < dstCompCount)
+        while (srcColumnIndex < srcColumnCount || dstColumnIndex < dstColumnCount)
         {
             // Only dst types remain -> components added
-            if (srcRow >= srcCompCount)
+            if (srcColumnIndex >= srcColumnCount)
             {
-                var dstTypeId = dstChunk.GetComponentId(dstCompIndex);
+                var dstTypeId = dstChunk.GetComponentId(dstRow);
                 var dstType = ComponentRegistry.Get(dstTypeId)!.Value.ManagedType;
-                var dstColumn = dstChunk.Columns[dstCompIndex];
+                var dstColumn = dstChunk.Columns[dstColumnIndex];
                 dstColumn.SetValue(Activator.CreateInstance(dstType), dstRow);
 
-                dstRow++;
+                dstColumnIndex++;
                 continue;
             }
 
             // Only src types remain -> components removed
-            if (dstRow >= dstCompCount)
+            if (dstColumnIndex >= dstColumnCount)
             {
                 if (!isMovingLastRow)
                 {
-                    var srcTypeId = srcChunk!.GetComponentId(srcCompIndex);
+                    var srcTypeId = srcChunk!.GetComponentId(srcRow);
                     var srcType = ComponentRegistry.Get(srcTypeId)!.Value.ManagedType;
-                    var srcColumn = srcChunk.Columns[srcCompIndex];
+                    var srcColumn = srcChunk.Columns[srcColumnIndex];
                     srcColumn.SetValue(null /*Activator.CreateInstance(srcType)*/, srcRow);
                 }
 
-                srcRow++;
+                srcColumnIndex++;
                 continue;
             }
 
             {
-                var srcTypeId = srcChunk!.GetComponentId(srcCompIndex);
-                var dstTypeId = dstChunk.GetComponentId(dstCompIndex);
+                var srcTypeId = srcChunk!.GetComponentId(srcColumnIndex);
+                var dstTypeId = dstChunk.GetComponentId(dstColumnIndex);
 
                 if (srcTypeId == dstTypeId)
                 {
                     // Type present in both chunks -> move value from src -> dst
-                    var srcColumn = srcChunk.Columns[srcCompIndex];
-                    var dstColumn = dstChunk.Columns[dstCompIndex];
+                    var srcColumn = srcChunk.Columns[srcColumnIndex];
+                    var dstColumn = dstChunk.Columns[dstColumnIndex];
 
                     dstColumn.SetValue(srcColumn.GetValue(srcRow), dstRow);
 
-                    srcRow++;
-                    dstRow++;
+                    srcColumnIndex++;
+                    dstColumnIndex++;
                 }
                 else if (srcTypeId < dstTypeId)
                 {
                     // Type removed
                     var srcType = ComponentRegistry.Get(srcTypeId)!.Value.ManagedType;
-                    var srcColumn = srcChunk.Columns[srcCompIndex];
+                    var srcColumn = srcChunk.Columns[srcColumnIndex];
                     srcColumn.SetValue(null /*Activator.CreateInstance(srcType)*/, srcRow);
 
-                    srcRow++;
+                    srcColumnIndex++;
                 }
                 else // srcTypeId > dstTypeId
                 {
                     // Type added
                     var dstType = ComponentRegistry.Get(dstTypeId)!.Value.ManagedType;
-                    var dstColumn = dstChunk.Columns[dstCompIndex];
+                    var dstColumn = dstChunk.Columns[dstColumnIndex];
                     dstColumn.SetValue(Activator.CreateInstance(dstType), dstRow);
 
-                    dstRow++;
+                    dstColumnIndex++;
                 }
             }
         }
@@ -248,11 +256,11 @@ public class World
         // Swap remove entity row froms src chunk (keep packed)
         if (srcChunk != null)
         {
-            srcChunk.RemoveEntity((uint)srcCompIndex, out var swappedEntity);
+            srcChunk.RemoveEntity((uint)srcRow, out var swappedEntity);
             if (swappedEntity != Entity.Null)
             {
                 ref var swappedEntityRecord = ref GetEntityRecord(swappedEntity.Id);
-                swappedEntityRecord.ChunkIndex = srcCompIndex;
+                swappedEntityRecord.ChunkIndex = srcRow;
             }
         }
     }
@@ -265,5 +273,5 @@ internal struct EntityRecord()
     public uint Version = 0;
     public Archetype? Archetype = null; // Currently assigned archetype
     public int ChunkIndex = -1;         // Chunk index in archetype
-    public int ComponentRow = -1;       // Component index in chunk
+    public int Row = -1;                // Component index in chunk
 }
