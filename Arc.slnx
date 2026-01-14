@@ -1,6 +1,7 @@
 <Solution>
   <Folder Name="/Samples/">
     <Project Path="Samples/Arc.Samples.BouncingBoxes/Arc.Samples.BouncingBoxes.csproj" />
+    <Project Path="Samples/Arc.Samples.SpaceShooter/Arc.Samples.SpaceShooter.csproj" />
     <Project Path="Samples/Bridgehead/Bridgehead.csproj" />
   </Folder>
   <Folder Name="/Source/">

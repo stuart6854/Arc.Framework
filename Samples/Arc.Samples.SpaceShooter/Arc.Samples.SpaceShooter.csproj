@@ -11,15 +11,15 @@
         <ProjectReference Include="..\..\Source\Arc.Ecs.SourceGen\Arc.Ecs.SourceGen\Arc.Ecs.SourceGen.csproj"
                           OutputItemType="Analyzer"
                           ReferenceOutputAssembly="false"/>
-        <ProjectReference Include="..\..\Source\Arc.Graphics.D3D11\Arc.Graphics.D3D11.csproj" />
+        <ProjectReference Include="..\..\Source\Arc.Graphics.D3D11\Arc.Graphics.D3D11.csproj"/>
     </ItemGroup>
 
     <ItemGroup>
-      <PackageReference Include="SixLabors.ImageSharp" Version="3.1.12" />
+        <PackageReference Include="SixLabors.ImageSharp" Version="3.1.12"/>
     </ItemGroup>
 
     <ItemGroup>
-        <EmbeddedResource Include="Source\Graphics\2D.hlsl" />
+        <EmbeddedResource Include="Source\Graphics\2D.hlsl"/>
     </ItemGroup>
 
 </Project>
