@@ -1,5 +1,4 @@
 using System.CodeDom.Compiler;
-using System.Text;
 using Microsoft.CodeAnalysis;
 
 namespace Arc.Ecs.SourceGen;
@@ -9,16 +8,31 @@ public class QueryGenerator : IIncrementalGenerator
 {
     public void Initialize(IncrementalGeneratorInitializationContext context)
     {
+        // Emit queries ONLY when compiling Arc.Ecs assembly
+        var isArcEcs = context.CompilationProvider.Select(static (compilation, _) => string.Equals(
+                compilation.AssemblyName, "Arc.Ecs", StringComparison.Ordinal
+            )
+        );
+
         // Generate the source code.
         for (var arity = 2; arity < 5; ++arity)
         {
             var arityCount = arity;
-            context.RegisterPostInitializationOutput(ctx => ExecuteQueryGen(ctx, arityCount));
-            context.RegisterPostInitializationOutput(ctx => ExecuteWorldGen(ctx, arityCount));
+
+            context.RegisterSourceOutput(
+                isArcEcs, (spc, emit) =>
+                {
+                    if (!emit)
+                        return;
+
+                    ExecuteQueryGen(spc, arityCount);
+                    ExecuteWorldGen(spc, arityCount);
+                }
+            );
         }
     }
 
-    private static void ExecuteQueryGen(IncrementalGeneratorPostInitializationContext ctx, int arity)
+    private static void ExecuteQueryGen(SourceProductionContext ctx, int arity)
     {
         using var sw = new StringWriter();
         using IndentedTextWriter writer = new(sw);
@@ -44,7 +58,7 @@ public class QueryGenerator : IIncrementalGenerator
         ctx.AddSource($"Arc.Ecs.Query.{arity}.g.cs", resultSource);
     }
 
-    private static void ExecuteWorldGen(IncrementalGeneratorPostInitializationContext ctx, int arity)
+    private static void ExecuteWorldGen(SourceProductionContext ctx, int arity)
     {
         using var sw = new StringWriter();
         using IndentedTextWriter writer = new(sw);

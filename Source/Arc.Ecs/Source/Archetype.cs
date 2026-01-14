@@ -2,40 +2,35 @@
 
 namespace Arc.Ecs;
 
-using ComponentId = ulong;
-using ArchetypeKeyHash = ulong;
-
 public readonly struct ArchetypeKey
 {
-    public List<ComponentId> ComponentTypeIds { get; } = [];
+    public List<int> TypeIndices { get; } = [];
     public ComponentMask Mask { get; } = new();
-    public ArchetypeKeyHash Hash { get; }
 
     public ArchetypeKey() { }
-    public ArchetypeKey(params ComponentId[] componentTypeIds)
+    public ArchetypeKey(params int[] typeIndices)
     {
-        ComponentTypeIds.AddRange(componentTypeIds);
-        ComponentTypeIds.Sort();
-        Mask = ComponentMask.FromMax(ComponentTypeIds.Count > 0 ? ComponentRegistry.Get(ComponentTypeIds.Last())!.Value.BitIndex + 1 : 0);
-        Hash = FNV1A.ComputeHash(ComponentTypeIds);
-    }
-    // public ArchetypeKey(params Type[] componentTypes) : this(componentTypes.Select(t => FNV1A.ComputeHash(t.FullName!)).ToArray()) { }
-
-    public ArchetypeKey(ArchetypeKey otherKey, ComponentId idToAdd)
-    {
-        ComponentTypeIds.AddRange(otherKey.ComponentTypeIds);
-        ComponentTypeIds.Add(idToAdd);
-        ComponentTypeIds.Sort();
-        Mask = ComponentMask.FromMax(ComponentTypeIds.Count > 0 ? ComponentRegistry.Get(ComponentTypeIds.Last())!.Value.BitIndex + 1 : 0);
-        Hash = FNV1A.ComputeHash(ComponentTypeIds);
+        TypeIndices.AddRange(typeIndices);
+        TypeIndices.Sort();
+        foreach (var typeIndex in TypeIndices)
+            Mask.SetBit(typeIndex);
     }
 
-    public bool Has(ComponentId typeId) => ComponentTypeIds.BinarySearch(typeId) >= 0;
-    public bool Has<T>() => Has(ComponentInfo<T>.Id);
+    public ArchetypeKey(ArchetypeKey otherKey, int typeIndexToAdd)
+    {
+        TypeIndices.AddRange(otherKey.TypeIndices);
+        TypeIndices.Add(typeIndexToAdd);
+        TypeIndices.Sort();
+        foreach (var typeIndex in TypeIndices)
+            Mask.SetBit(typeIndex);
+    }
 
-    public bool Equals(ArchetypeKey other) => Hash.Equals(other.Hash);
+    public bool Has(int typeIndex) => Mask.HasBit(typeIndex);
+    public bool Has<T>() => Has(ComponentRegistry.Get<T>().TypeIndex);
+
+    public bool Equals(ArchetypeKey other) => Mask.Equals(other.Mask);
     public override bool Equals(object? obj) => obj is ArchetypeKey other && Equals(other);
-    public override int GetHashCode() => ComponentTypeIds.GetHashCode();
+    public override int GetHashCode() => TypeIndices.GetHashCode();
     public static bool operator ==(ArchetypeKey left, ArchetypeKey right) => left.Equals(right);
     public static bool operator !=(ArchetypeKey left, ArchetypeKey right) => !left.Equals(right);
 }
@@ -50,10 +45,9 @@ public class Archetype(uint uniqueId, ArchetypeKey key)
     public uint UniqueId { get; } = uniqueId;
     public ArchetypeKey Key { get; } = key;
     public ComponentMask Mask => Key.Mask;
-    public uint ComponentCount => (uint)Key.ComponentTypeIds.Count;
+    public uint ComponentCount => (uint)Key.TypeIndices.Count;
 
     public int EntityCount { get; set; }
-    // public List<Entity> Entities { get; } = [];
 
     public List<Chunk> Chunks { get; } = [];
 
@@ -63,7 +57,7 @@ public class Archetype(uint uniqueId, ArchetypeKey key)
         Chunk chunk;
         if (Chunks.Count == 0 || Chunks.Last().IsFull)
         {
-            chunk = new Chunk(this, Key.ComponentTypeIds, ChunkCapacity);
+            chunk = new Chunk(this, Key.TypeIndices, ChunkCapacity);
             chunkIndex = Chunks.Count;
             Chunks.Add(chunk);
         }

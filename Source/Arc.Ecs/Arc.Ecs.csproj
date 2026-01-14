@@ -10,7 +10,7 @@
     <ItemGroup>
         <ProjectReference Include="..\Arc.Core\Arc.Core.csproj"/>
         <!-- In-repo development: use project reference as analyzer -->
-        <ProjectReference Include="..\Arc.Ecs.SourceGen\Arc.Ecs.SourceGen.csproj"
+        <ProjectReference Include="..\Arc.Ecs.SourceGen\Arc.Ecs.SourceGen\Arc.Ecs.SourceGen.csproj"
                           OutputItemType="Analyzer"
                           ReferenceOutputAssembly="false"/>
     </ItemGroup>

@@ -10,9 +10,9 @@ public delegate void ForEachEntity<T0>(Entity e, ref T0 t0);
 
 internal struct QueryFilter()
 {
-    public ComponentMask All = ComponentMask.FromMax(ComponentRegistry.Components.Count);
-    public ComponentMask Any = ComponentMask.FromMax(ComponentRegistry.Components.Count);
-    public ComponentMask None = ComponentMask.FromMax(ComponentRegistry.Components.Count);
+    public ComponentMask All = new();
+    public ComponentMask Any = new();
+    public ComponentMask None = new();
 
     public readonly bool Matches(in ComponentMask mask)
     {
@@ -34,7 +34,7 @@ public class QueryBase
     public QueryBase(World world)
     {
         World = world;
-        Filter.None.SetBit(ComponentRegistry.Get(ComponentInfo<Disabled>.Id)!.Value.BitIndex);
+        Filter.None.SetBit(ComponentRegistry.Get<Disabled>().TypeIndex);
     }
 
     public Entity FindFirst()
@@ -91,19 +91,19 @@ public abstract class QueryBase<TSelf> : QueryBase
 
     public TSelf Optional<TTy0>() where TTy0 : struct
     {
-        Filter.Any.SetBit(ComponentRegistry.Get(ComponentInfo<TTy0>.Id)!.Value.BitIndex);
+        Filter.Any.SetBit(ComponentRegistry.Get<TTy0>().TypeIndex);
         return (TSelf)this;
     }
 
     public TSelf Without<TTy0>() where TTy0 : struct
     {
-        Filter.None.SetBit(ComponentRegistry.Get(ComponentInfo<TTy0>.Id)!.Value.BitIndex);
+        Filter.None.SetBit(ComponentRegistry.Get<TTy0>().TypeIndex);
         return (TSelf)this;
     }
 
     public TSelf WithDisabled()
     {
-        Filter.None.ClearBit(ComponentRegistry.Get(ComponentInfo<Disabled>.Id)!.Value.BitIndex);
+        Filter.None.ClearBit(ComponentRegistry.Get<Disabled>().TypeIndex);
         return (TSelf)this;
     }
 }

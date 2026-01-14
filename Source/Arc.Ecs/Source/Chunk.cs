@@ -2,7 +2,7 @@
 
 public sealed class Chunk
 {
-    internal static uint ChunkByteBudget => 16u * 1024u; // 64kb
+    // internal static uint ChunkByteBudget => 16u * 1024u; // 64kb
 
     public Archetype Archetype { get; init; }
     public Entity[] Entities { get; }
@@ -11,29 +11,28 @@ public sealed class Chunk
 
     public bool IsFull => Count == Entities.Length;
 
-    public Chunk(Archetype archetype, IList<ulong> typesIds, uint capacity)
+    public Chunk(Archetype archetype, IList<int> typeIndices, uint capacity)
     {
         Archetype = archetype;
         Entities = new Entity[capacity];
-        Columns = new Array[typesIds.Count];
+        Columns = new Array[typeIndices.Count];
         for (var i = 0; i < Columns.Length; i++)
         {
-            var type = ComponentRegistry.Get(typesIds[i])!.Value.ManagedType;
+            var type = ComponentRegistry.Get(typeIndices[i]).ManagedType;
             Columns[i] = Array.CreateInstance(type, capacity);
         }
         Count = 0;
     }
 
-    public ulong GetComponentId(int index)
+    public int GetColumnTypeIndex(int columnIndex)
     {
-        if (index >= Archetype.ComponentCount)
+        if (columnIndex >= Archetype.ComponentCount)
             return 0;
-        return Archetype.Key.ComponentTypeIds[index];
+        return Archetype.Key.TypeIndices[columnIndex];
     }
 
-    public int GetColumnIndex(ulong componentId) { return Archetype.Key.ComponentTypeIds.BinarySearch(componentId); }
-
-    public int GetColumnIndex<T>() { return GetColumnIndex(ComponentInfo<T>.Id); }
+    public int GetColumnIndex(int typeIndex) => Archetype.Key.Mask.CountBitsUpto(typeIndex) - 1;
+    public int GetColumnIndex<T>() => GetColumnIndex(ComponentRegistry.Get<T>().TypeIndex);
 
     public uint AddEntity(Entity entity)
     {

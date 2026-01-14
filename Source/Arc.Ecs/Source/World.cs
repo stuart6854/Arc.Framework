@@ -86,10 +86,10 @@ public class World
         if (entityRecord.Version != entity.Version)
             return; // Silently fail
 
-        var typeId = ComponentInfo<T>.Id;
+        var typeIndex = ComponentRegistry.Get<T>().TypeIndex;
 
         var srcArchetype = entityRecord.Archetype!;
-        var key = new ArchetypeKey(srcArchetype.Key, typeId);
+        var key = new ArchetypeKey(srcArchetype.Key, typeIndex);
 
         var dstArchetype = GetOrCreateArchetype(key);
         dstArchetype.AddNewEntity(entity, out var dstChunkIndex, out var dstRow);
@@ -109,10 +109,10 @@ public class World
         if (entityRecord.Version != entity.Version)
             return; // Silently fail
 
-        var typeId = ComponentInfo<T>.Id;
+        var typeIndex = ComponentRegistry.Get<T>().TypeIndex;
 
         var srcArchetype = entityRecord.Archetype!;
-        var key = new ArchetypeKey(srcArchetype.Key.ComponentTypeIds.Where(t => t != typeId).ToArray());
+        var key = new ArchetypeKey(srcArchetype.Key.TypeIndices.Where(t => t != typeIndex).ToArray());
 
         var dstArchetype = GetOrCreateArchetype(key);
         dstArchetype.AddNewEntity(entity, out var dstChunkIndex, out var dstCompIndex);
@@ -193,8 +193,8 @@ public class World
             // Only dst types remain -> components added
             if (srcColumnIndex >= srcColumnCount)
             {
-                var dstTypeId = dstChunk.GetComponentId(dstRow);
-                var dstType = ComponentRegistry.Get(dstTypeId)!.Value.ManagedType;
+                var dstTypeIndex = dstChunk.GetColumnTypeIndex(dstColumnIndex);
+                var dstType = ComponentRegistry.Get(dstTypeIndex).ManagedType;
                 var dstColumn = dstChunk.Columns[dstColumnIndex];
                 dstColumn.SetValue(Activator.CreateInstance(dstType), dstRow);
 
@@ -207,8 +207,8 @@ public class World
             {
                 if (!isMovingLastRow)
                 {
-                    var srcTypeId = srcChunk!.GetComponentId(srcRow);
-                    var srcType = ComponentRegistry.Get(srcTypeId)!.Value.ManagedType;
+                    var srcTypeIndex = srcChunk!.GetColumnTypeIndex(srcColumnIndex);
+                    var srcType = ComponentRegistry.Get(srcTypeIndex).ManagedType;
                     var srcColumn = srcChunk.Columns[srcColumnIndex];
                     srcColumn.SetValue(null /*Activator.CreateInstance(srcType)*/, srcRow);
                 }
@@ -218,10 +218,10 @@ public class World
             }
 
             {
-                var srcTypeId = srcChunk!.GetComponentId(srcColumnIndex);
-                var dstTypeId = dstChunk.GetComponentId(dstColumnIndex);
+                var srcTypeIndex = srcChunk!.GetColumnTypeIndex(srcColumnIndex);
+                var dstTypeIndex = dstChunk.GetColumnTypeIndex(dstColumnIndex);
 
-                if (srcTypeId == dstTypeId)
+                if (srcTypeIndex == dstTypeIndex)
                 {
                     // Type present in both chunks -> move value from src -> dst
                     var srcColumn = srcChunk.Columns[srcColumnIndex];
@@ -232,10 +232,10 @@ public class World
                     srcColumnIndex++;
                     dstColumnIndex++;
                 }
-                else if (srcTypeId < dstTypeId)
+                else if (srcTypeIndex < dstTypeIndex)
                 {
                     // Type removed
-                    var srcType = ComponentRegistry.Get(srcTypeId)!.Value.ManagedType;
+                    var srcType = ComponentRegistry.Get(srcTypeIndex).ManagedType;
                     var srcColumn = srcChunk.Columns[srcColumnIndex];
                     srcColumn.SetValue(null /*Activator.CreateInstance(srcType)*/, srcRow);
 
@@ -244,7 +244,7 @@ public class World
                 else // srcTypeId > dstTypeId
                 {
                     // Type added
-                    var dstType = ComponentRegistry.Get(dstTypeId)!.Value.ManagedType;
+                    var dstType = ComponentRegistry.Get(dstTypeIndex).ManagedType;
                     var dstColumn = dstChunk.Columns[dstColumnIndex];
                     dstColumn.SetValue(Activator.CreateInstance(dstType), dstRow);
 
