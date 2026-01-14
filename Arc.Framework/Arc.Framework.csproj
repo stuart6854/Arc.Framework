@@ -14,6 +14,7 @@
     <ItemGroup>
         <ProjectReference Include="..\Source\Arc.Core\Arc.Core.csproj"/>
         <ProjectReference Include="..\Source\Arc.Ecs\Arc.Ecs.csproj"/>
+        <ProjectReference Include="..\Source\Arc.Graphics\Arc.Graphics.csproj" />
         <ProjectReference Include="..\Source\Arc.Platform\Arc.Platform.csproj"/>
         <ProjectReference Include="..\Source\Arc.Runtime\Arc.Runtime.csproj"/>
     </ItemGroup>
