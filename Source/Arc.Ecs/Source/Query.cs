@@ -89,13 +89,19 @@ public abstract class QueryBase<TSelf> : QueryBase
 {
     protected QueryBase(World world) : base(world) { }
 
-    public TSelf Optional<TTy0>() where TTy0 : struct
+    public TSelf With<TTy0>()
+    {
+        Filter.All.SetBit(ComponentRegistry.Get<TTy0>().TypeIndex);
+        return (TSelf)this;
+    }
+
+    public TSelf Optional<TTy0>()
     {
         Filter.Any.SetBit(ComponentRegistry.Get<TTy0>().TypeIndex);
         return (TSelf)this;
     }
 
-    public TSelf Without<TTy0>() where TTy0 : struct
+    public TSelf Without<TTy0>()
     {
         Filter.None.SetBit(ComponentRegistry.Get<TTy0>().TypeIndex);
         return (TSelf)this;
@@ -149,7 +155,7 @@ public class Query : QueryBase<Query>
 
 public class Query<T0> : QueryBase<Query<T0>>
 {
-    public Query(World world) : base(world) { }
+    public Query(World world) : base(world) { With<T0>(); }
 
     public void ForEach(ForEach<T0> forEach)
     {

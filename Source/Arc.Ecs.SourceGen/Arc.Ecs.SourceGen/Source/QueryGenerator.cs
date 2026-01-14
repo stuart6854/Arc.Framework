@@ -47,7 +47,7 @@ public class QueryGenerator : IIncrementalGenerator
         writer.WriteLine($"public class Query<{GenericArgs(arity)}> : QueryBase<Query<{GenericArgs(arity)}>>");
         writer.WriteLine("{");
         writer.Indent++;
-        Ctor(writer);
+        Ctor(writer, arity);
         writer.WriteLine();
         ForEach(writer, arity);
         writer.WriteLine();
@@ -84,7 +84,16 @@ public class QueryGenerator : IIncrementalGenerator
         writer.WriteLine($"public delegate void ForEachEntity<{GenericArgs(arity)}>(Entity entity, {ForEachParams(arity)});");
     }
 
-    private static void Ctor(IndentedTextWriter writer) => writer.WriteLine("public Query(World world) : base(world) { }");
+    private static void Ctor(IndentedTextWriter writer, int arity)
+    {
+        writer.WriteLine("public Query(World world) : base(world)");
+        writer.WriteLine("{");
+        writer.Indent++;
+        for (var i = 0; i < arity; ++i)
+            writer.WriteLine($"With<T{i}>();");
+        writer.Indent--;
+        writer.WriteLine("}");
+    }
 
     private static void ForEach(IndentedTextWriter writer, int arity)
     {
