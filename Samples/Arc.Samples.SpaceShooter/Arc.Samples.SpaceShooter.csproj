@@ -20,6 +20,18 @@
 
     <ItemGroup>
         <EmbeddedResource Include="Source\Graphics\2D.hlsl"/>
+        <None Remove="Assets\meteor_large.png" />
+        <EmbeddedResource Include="Assets\meteor_large.png">
+          <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+        </EmbeddedResource>
+        <None Remove="Assets\meteor_small.png" />
+        <EmbeddedResource Include="Assets\meteor_small.png">
+        <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+        </EmbeddedResource>
+        <None Remove="Assets\ship_G.png" />
+        <EmbeddedResource Include="Assets\ship_G.png">
+          <CopyToOutputDirectory>Never</CopyToOutputDirectory>
+        </EmbeddedResource>
     </ItemGroup>
 
 </Project>

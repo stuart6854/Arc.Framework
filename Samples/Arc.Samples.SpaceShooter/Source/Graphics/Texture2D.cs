@@ -2,7 +2,7 @@
 using SixLabors.ImageSharp;
 using SixLabors.ImageSharp.PixelFormats;
 
-namespace Arc.Samples.BouncingBoxes;
+namespace Arc.Samples.SpaceShooter;
 
 public sealed class Texture2D
 {
@@ -41,11 +41,17 @@ public sealed class Texture2D
         }
     }
 
-    public static Texture2D FromFile(IGfxDevice device, string filename)
+    public static Texture2D FromStream(IGfxDevice device, Stream stream)
     {
-        using var image = Image.Load<Byte4>(filename);
+        using var image = Image.Load<Byte4>(stream);
         var bytes = new byte[image.Width * image.Height * 4];
         image.CopyPixelDataTo(bytes);
         return new Texture2D(device, Format.RGBA8_UNORM, (uint)image.Width, (uint)image.Height, bytes);
+    }
+
+    public static Texture2D FromFile(IGfxDevice device, string filename)
+    {
+        using var stream = File.OpenRead(filename);
+        return FromStream(device, stream);
     }
 }

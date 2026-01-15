@@ -1,7 +1,7 @@
 ﻿using System.Numerics;
 using Arc.Ecs;
 
-namespace Arc.Samples.BouncingBoxes;
+namespace Arc.Samples.SpaceShooter;
 
 [Component]
 public struct Position

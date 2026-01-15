@@ -5,7 +5,7 @@ using Arc.Graphics;
 using Vortice.Mathematics;
 using Rect = Vortice.Mathematics.Rect;
 
-namespace Arc.Samples.BouncingBoxes;
+namespace Arc.Samples.SpaceShooter;
 
 public static class Renderer2D
 {
@@ -37,7 +37,8 @@ public static class Renderer2D
     {
         Device = device;
 
-        const string resourceName = "Arc.Samples.BouncingBoxes.Source.Graphics.2D.hlsl";
+        var resources = Assembly.GetExecutingAssembly().GetManifestResourceNames();
+        string resourceName = resources.First(r => r.EndsWith("2D.hlsl"));
         using (Stream stream = Assembly.GetExecutingAssembly().GetManifestResourceStream(resourceName)!)
         using (StreamReader reader = new StreamReader(stream))
         {
@@ -122,12 +123,12 @@ public static class Renderer2D
 
         var hs = size * 0.5f;
         var rect = new Rect(center - hs, new Size(size.X, size.Y));
-        batch.Vertices.Add(new Vertex { Position = rect.TopLeft, TexCoord = center, Color = color.ToRgba() });
-        batch.Vertices.Add(new Vertex { Position = rect.TopRight, TexCoord = center, Color = color.ToRgba() });
-        batch.Vertices.Add(new Vertex { Position = rect.BottomRight, TexCoord = center, Color = color.ToRgba() });
-        batch.Vertices.Add(new Vertex { Position = rect.BottomRight, TexCoord = center, Color = color.ToRgba() });
-        batch.Vertices.Add(new Vertex { Position = rect.BottomLeft, TexCoord = center, Color = color.ToRgba() });
-        batch.Vertices.Add(new Vertex { Position = rect.TopLeft, TexCoord = center, Color = color.ToRgba() });
+        batch.Vertices.Add(new Vertex { Position = rect.TopLeft, TexCoord = new Vector2(0, 1), Color = color.ToRgba() });
+        batch.Vertices.Add(new Vertex { Position = rect.TopRight, TexCoord = new Vector2(1, 1), Color = color.ToRgba() });
+        batch.Vertices.Add(new Vertex { Position = rect.BottomRight, TexCoord = new Vector2(1, 0), Color = color.ToRgba() });
+        batch.Vertices.Add(new Vertex { Position = rect.BottomRight, TexCoord = new Vector2(1, 0), Color = color.ToRgba() });
+        batch.Vertices.Add(new Vertex { Position = rect.BottomLeft, TexCoord = new Vector2(0, 0), Color = color.ToRgba() });
+        batch.Vertices.Add(new Vertex { Position = rect.TopLeft, TexCoord = new Vector2(0, 1), Color = color.ToRgba() });
     }
 
     private static ref Batch EnsureBatch(Texture2D texture, int requiredVertices)
